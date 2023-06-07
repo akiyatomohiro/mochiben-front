@@ -1,118 +1,110 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import type { NextPage } from 'next';
+import { AxiosError, AxiosResponse } from 'axios';
+import { ChangeEvent, useState } from 'react';
+import { RequiredMark } from '@/components/RequiredMark';
+import axios from "@/libs/axios"
+import { useRouter } from 'next/router';
 
-const inter = Inter({ subsets: ['latin'] })
+// POSTデータの型
+type LoginForm = {
+  email: string;
+  password: string;
+};
 
-export default function Home() {
+// バリデーションメッセージの型
+type Validation = LoginForm & { loginFailed: string };
+
+const Home: NextPage = () => {
+  const router = useRouter();
+
+  // state定義
+  const [loginForm, setLoginForm] = useState<LoginForm>({
+    email: '',
+    password: '',
+  });
+  const [validation, setValidation] = useState<Validation>({
+    email: '',
+    password: '',
+    loginFailed: '',
+  });
+
+  // POSTデータの更新
+  const updateLoginForm = (e: ChangeEvent<HTMLInputElement>) => {
+    setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
+  };
+
+  // ログイン
+  const login = () => {
+    axios
+      // CSRF保護の初期化
+      .get('/sanctum/csrf-cookie')
+      .then((res) => {
+        // ログイン処理
+        axios
+          .post('/login', loginForm)
+          .then((response: AxiosResponse) => {
+            console.log(response.data);
+            router.push('/memos');
+          })
+          .catch((err: AxiosError) => {
+            console.log(err.response);
+          });
+      });
+  };
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className='w-2/3 mx-auto py-24'>
+      <div className='w-1/2 mx-auto border-2 px-12 py-16 rounded-2xl'>
+        <h3 className='mb-10 text-2xl text-center'>ログイン</h3>
+        <div className='mb-5'>
+          <div className='flex justify-start my-2'>
+            <p>メールアドレス</p>
+            <RequiredMark />
+          </div>
+          {/* value属性とonChangeイベントを追加 */}
+          <input
+            className='p-2 border rounded-md w-full outline-none'
+            name='email'
+            value={loginForm.email}
+            onChange={updateLoginForm}
+          />
+          {/* <p className='py-3 text-red-500'>必須入力です。</p> */}
+        </div>
+        <div className='mb-5'>
+          <div className='flex justify-start my-2'>
+            <p>パスワード</p>
+            <RequiredMark />
+          </div>
+          <small className='mb-2 text-gray-500 block'>
+            8文字以上の半角英数字で入力してください
+          </small>
+          {/* value属性とonChangeイベントを追加 */}
+          <input
+            className='p-2 border rounded-md w-full outline-none'
+            name='password'
+            type='password'
+            value={loginForm.password}
+            onChange={updateLoginForm}
+          />
+          {/* <p className='py-3 text-red-500'>
+            8文字以上の半角英数字で入力してください。
+          </p> */}
+        </div>
+        <div className='text-center mt-12'>
+          {/* <p className='py-3 text-red-500'>
+            IDまたはパスワードが間違っています。
+          </p> */}
+          {/* onClick={login}を追加 */}
+          <button
+            className='bg-gray-700 text-gray-50 py-3 sm:px-20 px-10 rounded-xl cursor-pointer drop-shadow-md hover:bg-gray-600'
+            onClick={login}
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            ログイン
+          </button>
         </div>
       </div>
+    </div>
+  );
+};
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+export default Home;
