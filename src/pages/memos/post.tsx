@@ -2,7 +2,7 @@ import { AxiosError, AxiosResponse } from 'axios';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { ChangeEvent, useState } from 'react';
-import { RequiredMark } from '../../components/RequiredMark';
+import { RequiredMark } from '@/components/RequiredMark';
 import axios from '@/libs/axios';
 
 // POSTデータの型

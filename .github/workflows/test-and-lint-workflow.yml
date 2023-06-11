@@ -1,0 +1,133 @@
+name: Test and Lint
+on: [push]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Cache node modules
+        id: node_modules_cache_id
+        uses: actions/cache@v2
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-testandlint-${{ hashFiles(format('{0}{1}', github.workspace, '/package-lock.json')) }}
+
+      - name: Install packages
+        if: steps.node_modules_cache_id.outputs.cache-hit != 'true'
+        run: npm install && ls -la
+
+  test:
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Restore node_modules
+        id: node_modules_cache_id
+        uses: actions/cache@v2
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-testandlint-${{ hashFiles(format('{0}{1}', github.workspace, '/package-lock.json')) }}
+
+      - name: Install packages
+        if: steps.node_modules_cache_id.outputs.cache-hit != 'true'
+        run: npm install
+
+      # - name: Create env file
+      #   run: |
+      #     echo "--API_ENDPOINT_BASE:  ${{ secrets.API_ENDPOINT_BASE }} --"
+      #     touch .env
+      #     echo "API_ENDPOINT_BASE=${{ secrets.API_ENDPOINT_BASE }}" >> .env
+      #     echo "APP_ID=${{ secrets.APP_ID }}" >> .env
+      #     echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> .env
+
+      - name: run test
+        run: |
+          touch .env
+          echo "API_ENDPOINT_BASE=${{ secrets.API_ENDPOINT_BASE }}" >> .env
+          echo "APP_ID=${{ secrets.APP_ID }}" >> .env
+          echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> .env
+          echo "TEST_APP_AUTH_ID=${{ secrets.TEST_APP_AUTH_ID }}" >> .env
+          npm run test
+        env:
+          TZ: "Asia/Tokyo"
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Restore node_modules
+        id: node_modules_cache_id
+        uses: actions/cache@v2
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-testandlint-${{ hashFiles(format('{0}{1}', github.workspace, '/package-lock.json')) }}
+
+      - name: Install packages
+        if: steps.node_modules_cache_id.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: run lint
+        run: npm run lint
+
+  # build:
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - test
+  #     - lint
+
+  #   steps:
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 18.x
+
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 1
+
+  #     - name: Restore node_modules
+  #       id: node_modules_cache_id
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: ./node_modules
+  #         key: ${{ runner.os }}-testandlint-${{ hashFiles(format('{0}{1}', github.workspace, '/package-lock.json')) }}
+
+  #     - name: Install packages
+  #       if: steps.node_modules_cache_id.outputs.cache-hit != 'true'
+  #       run: npm install
+
+  #     - name: run build
+  #       run: npm run build
