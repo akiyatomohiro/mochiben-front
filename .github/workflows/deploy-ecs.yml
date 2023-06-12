@@ -33,7 +33,7 @@ jobs:
         with:
           push: true
           context: ./
-          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha,scope=mochiben-front
           cache-to: type=gha,scope=mochiben-front,mode=max
           platforms: linux/amd64
