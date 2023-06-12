@@ -53,7 +53,8 @@ const Home: NextPage = () => {
             console.log(err.response);
             // バリデーションエラー
             if (err.response?.status === 422) {
-              const errors = err.response?.data.errors;
+              // const errors = err.response?.data.errors;
+              const errors = (err.response.data as any).errors;
               // state更新用のオブジェクトを別で定義
               const validationMessages: { [index: string]: string } =
                 {} as Validation;
